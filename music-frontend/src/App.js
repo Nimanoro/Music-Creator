@@ -13,8 +13,6 @@ function App() {
   return (
     <div className="App">
       <Piano></Piano>
-      <h1>AI Music Creation Tool</h1>
-      <button onClick={sendMelody}>Generate Music</button>
     </div>
   );
 }
