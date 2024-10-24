@@ -1,0 +1,11 @@
+.center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Ensures the div takes the full height of the viewport */
+  }
+
+  .piano-container {
+    margin-top: 50px; /* Adjust this value to move the piano down */
+  }
+  

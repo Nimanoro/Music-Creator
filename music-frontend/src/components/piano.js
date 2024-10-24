@@ -1,39 +1,56 @@
-import React, {useState} from "react";
-import axios from "axios";
+import { Piano, KeyboardShortcuts, MidiNumbers } from 'react-piano';
+import 'react-piano/dist/styles.css';
+import SoundfontProvider from './soundfont-player';
+import { useState } from 'react';
 
-function playSound(note){
-    const audio = new Audio(`http://localhost:8000/api/note/${note}`);
-    audio.play();
-}
+import './piano.css'; // Ensure your CSS file is imported
 
-function Piano() {
-    const notes = ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'];
-    const [melody, setMelody] = useState([]);
+function PianoDisplay(props) {
+    const [isAudioContextStarted, setIsAudioContextStarted] = useState(false);
+    const firstNote = MidiNumbers.fromNote('c4');
+    const lastNote = MidiNumbers.fromNote('c5');
+    const keyboardShortcuts = KeyboardShortcuts.create({
+      firstNote: firstNote,
+      lastNote: lastNote,
+      keyboardConfig: KeyboardShortcuts.HOME_ROW,
+    });
+    const noteRange = {
+        first: MidiNumbers.fromNote('c4'),
+        last: MidiNumbers.fromNote('c5'),
+    };
+    const soundfontHostname = 'https://d1pzp51pvbm36p.cloudfront.net';
+    let audioContext = new (window.webkitAudioContext || window.AudioContext)();
+    const startAudioContext = () => {
+        audioContext.resume().then(() => {
+          setIsAudioContextStarted(true); // Update state when AudioContext is started
+          
 
-    
-    const addNote = (note) => {
-        console.log(note);
-        setMelody([...melody, note]);
-    }
-
-
-    const sendMelody = () => {
-        axios.post('http://localhost:8000/api/generate_music/', { melody })
-            .then(response => console.log(response.data))
-            .catch(error => console.error('Error:', error));
-    }
-
+        });
+      };
     return (
-        <div>
-            <h1>AI Music Creation Tool</h1>
-            <button onClick={sendMelody}>Generate Music</button>
-            <div>
-                {notes.map(note => (
-                    <button key={note} onClick={() => addNote(note)}>{note}</button>
-                ))}
-
+        <div className='center'>
+        {!isAudioContextStarted ? (
+            <button onClick={startAudioContext}>Start Piano</button>
+          ) : (
+       
+            <SoundfontProvider
+              instrumentName="acoustic_grand_piano"
+              audioContext={audioContext}
+              hostname={soundfontHostname}
+              render={({ isLoading, playNote, stopNote }) => (
+                <Piano
+                  noteRange={noteRange}
+                  playNote={playNote}
+                  stopNote={stopNote}
+                  disabled={isLoading}
+                  keyboardShortcuts={keyboardShortcuts}
+                  className="piano-container"
+                />
+              )}
+            />
+            
+            )};
             </div>
-        </div>
-    );
-}
-export default Piano;
+        );
+  }
+  export default PianoDisplay
